@@ -1,0 +1,4 @@
+
+
+class FreedomPopChecker(object):
+	pass
