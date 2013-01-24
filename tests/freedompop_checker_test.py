@@ -1,9 +1,13 @@
-import freedompop_checker
+import mock
 import unittest
+
+import freedompop_checker
+
 
 # TODO: Should probably write an integration test. Kind of scared to
 # expose credentials. Could alternatively write a mock server but
 # not worth it for a one off script.
+
 
 MOCK_RESPONSE = """
 <html>
@@ -31,25 +35,47 @@ MOCK_RESPONSE = """
 </html>
 """
 
-class FreedomPopCheckerUnitTest(unittest.Testcase):
+
+class FreedomPopCheckerUnitTest(unittest.TestCase):
 
 	def setUp(self):
-		self.mock_request_post = mock.patch(
-		'freedom_pop_checker.requests.post',
-		return_value=mock.mock(
-			text=MOCK_RESPONSE
+		self.mock_request_post_patcher = mock.patch(
+			'freedompop_checker.requests.post',
+			return_value=mock.Mock(
+				text=MOCK_RESPONSE
+			)
 		)
-	)
+		self.mock_request_post = self.mock_request_post_patcher.start()
+
+	def tearDown(self):
+		self.mock_request_post_patcher.stop()
 
 	def test_get_usage(self):
-		freedom_pop_checker = FreedomPopChecker(username, password)
-		usage = freedom_pop_checker.get_usage()
-		T.assert_equal(
-			usage.used,
-			9
+		checker = freedompop_checker.FreedomPopChecker('username', 'password')
+		usage = checker.get_usage()
+		self.assertEqual(usage.used, 9)
+		self.assertEqual(usage.max, 1525.76)
+
+
+class DataUsageResponseParserUnitTest(unittest.TestCase):
+
+	def test_get_data_usage(self):
+		response_parser = freedompop_checker.DataUsageResponseParser()
+		parsed_data_usage = response_parser.parse_data_usage(MOCK_RESPONSE)
+		self.assertEqual(parsed_data_usage.used, 9)
+		self.assertEqual(parsed_data_usage.max, 1525.76)
+
+
+class DataUsagePresenterUnitTest(unittest.TestCase):
+
+	def test_present(self):
+		presenter = freedompop_checker.DataUsagePresenter()
+		presented_string = presenter.present(
+			mock.Mock(
+				used=199,
+				max=500
+			)
 		)
-		T.assert_equal(
-			usage.max,
-			1525.76
-		)
+		self.assertEqual(presented_string, 'Used 199/500 MBs.')
+
 
