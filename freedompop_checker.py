@@ -1,9 +1,10 @@
+import argparse
 import re
 import requests
 from BeautifulSoup import BeautifulSoup
 
 
-FREEDOMPOP_LOGIN_URI = 'http://www.freedompop.com/login.htm'
+FREEDOMPOP_LOGIN_URI = 'https://www.freedompop.com/login.htm'
 
 
 class FreedomPopChecker(object):
@@ -69,11 +70,32 @@ class DataUsage(object):
 		self.used = used
 		self.max = max
 
+
 class DataUsagePresenter(object):
 
 	def present(self, data_usage):
 		return "Used %s/%s MBs." % (data_usage.used, data_usage.max)
 
+
+if __name__ == '__main__':
+
+	parser = argparse.ArgumentParser(description='Check data usage for freedompop.com')
+	parser.add_argument(
+		'username',
+		help='Freedompop username',
+	)
+	parser.add_argument(
+		'password',
+		help='Freedompop password',
+	)
+
+	args = parser.parse_args()
+
+	checker = FreedomPopChecker(args.username, args.password)
+	usage = checker.get_usage()
+
+	presenter = DataUsagePresenter()
+	presenter.present(usage)
 
 
 
