@@ -95,7 +95,7 @@ if __name__ == '__main__':
 	usage = checker.get_usage()
 
 	presenter = DataUsagePresenter()
-	presenter.present(usage)
+	print(presenter.present(usage))
 
 
 
